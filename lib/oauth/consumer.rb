@@ -79,6 +79,7 @@ module OAuth
     #   @photos=@access_token.get('/photos.xml')
     #
     def initialize(consumer_key, consumer_secret, options = {})
+      puts "initializing oauth consumer"
       @key    = consumer_key
       @secret = consumer_secret
 
@@ -141,6 +142,7 @@ module OAuth
     #
     # TODO oauth_callback should be a mandatory parameter
     def get_request_token(request_options = {}, *arguments, &block)
+      puts "get request token"
       # if oauth_callback wasn't provided, it is assumed that oauth_verifiers
       # will be exchanged out of band
       request_options[:oauth_callback] ||= OAuth::OUT_OF_BAND unless request_options[:exclude_callback]
@@ -210,8 +212,16 @@ module OAuth
 
     # Creates a request and parses the result as url_encoded. This is used internally for the RequestToken and AccessToken requests.
     def token_request(http_method, path, token = nil, request_options = {}, *arguments)
+      puts "consumer token request"
+      puts "method: #{http_method}"
+      puts "path: #{path}"
+      puts "token: #{token}"
+      puts "options: #{request_options}"
+      puts "args: #{arguments}"
       request_options[:token_request] ||= true
       response = request(http_method, path, token, request_options, *arguments)
+      puts "response #{response.code.to_i}:"
+      puts response
       case response.code.to_i
 
       when (200..299)
@@ -233,6 +243,7 @@ module OAuth
         response.error! if uri.path == path # careful of those infinite redirects
         self.token_request(http_method, uri.path, token, request_options, arguments)
       when (400..499)
+        puts response.body
         raise OAuth::Unauthorized, response
       else
         response.error!
